@@ -1,17 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_testing_tutorial/article.dart';
 import 'package:flutter_testing_tutorial/news_change_notifier.dart';
-import 'package:flutter_testing_tutorial/news_service.dart';
 import 'package:mocktail/mocktail.dart';
 
-class MockNewsService extends Mock implements NewsService {}
+import 'common/mock_new_service.dart' as mock;
+import 'common/test_utils.dart';
 
 void main() {
   late NewsChangeNotifier sut;
-  late MockNewsService mockNewsService;
+  late mock.MockNewsService mockNewsService;
 
   setUp(() {
-    mockNewsService = MockNewsService();
+    mockNewsService = mock.MockNewsService();
     sut = NewsChangeNotifier(mockNewsService);
   });
 
@@ -24,22 +23,10 @@ void main() {
   );
 
   group('getArticles', () {
-    final articlesFromService = [
-      Article(title: 'Test 1', content: 'Test 1 content'),
-      Article(title: 'Test 2', content: 'Test 2 content'),
-      Article(title: 'Test 3', content: 'Test 3 content'),
-    ];
-
-    void arrangeNewsServiceReturns3Articles() {
-      when(() => mockNewsService.getArticles()).thenAnswer(
-        (_) async => articlesFromService,
-      );
-    }
-
     test(
       "gets articles using the NewsService",
       () async {
-        arrangeNewsServiceReturns3Articles();
+        arrangeNewsServiceReturns3Articles(mockNewsService);
         await sut.getArticles();
         verify(() => mockNewsService.getArticles()).called(1);
       },
@@ -50,7 +37,7 @@ void main() {
       sets articles to the ones from the service,
       indicates that data is not being loaded anymore""",
       () async {
-        arrangeNewsServiceReturns3Articles();
+        arrangeNewsServiceReturns3Articles(mockNewsService);
         final future = sut.getArticles();
         expect(sut.isLoading, true);
         await future;
